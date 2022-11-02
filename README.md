@@ -48,6 +48,148 @@ incluye BIND por defecto.
 
 - **/etc/hosts**: En este fichero se pueden establecer relaciones IP dominio manuales.
 
-## Configuración de zona
+## Fichero de configuración de zona
 El fichero que se va a usar para configurar nuestra zona es
+
+```
+/etc/bind/db.empty
+```
+
+![](/capturas/ficheroZona.png)
+
+
+Este el fichero donde se guardan todas las zonas
+
+```
+/etc/bind/named.conf.default-zones
+```
+
+![](/capturas/ficheroGuardadoZonas.png)
+
+## Fichero de ruta de directorio de Bind
+
+Este fichero contiene la ruta del directorio bind
+```
+/var/cache/bind 
+```
+Es utilizado por BIND como referencia de todas las rutas relativas de ficheros.
+
+![](/capturas/rutasRelativasFichero.png)
+
+Vemos que tiene permisos de escritura y lectura
+
+![](/capturas/permisosRutasRelativas.png)
+
+## Configuración de servidor maestro
+
+Lo primero que hacemos es configurar el fichero 
+
+```
+/etc/resolv.conf
+```
+Añadimos la línea nameservers y la ip del servidor, el nombre de dominio y la búsqueda.
+
+![](/capturas/resolv.png)
+
+Acontinuación accedemos a la carpeta
+
+```
+cd /var/cache/bind
+```
+Hacemos una copia del fichero de configuracion
+
+```
+db.local
+```
+
+Con la copia de este fichero creamos otro para la configuracion no inversa de DNS. Le ponemos el nombre de 
+```
+db.master.antonio.org
+
+```
+
+> Nota: le ponemos el nombre de dominio al fichero.
+
+Configuramos el fichero:
+
+![](/capturas/configuracionMasterNoInverso.png)
+
+Añadimos el origen (el dominio), el nombre del servidor y sus ips.
+
+> Nota: Es muy importante hacerlo como en la imagen. No olvidar los espacios y los puntos (.)correspondientes a poner.
+
+Volvemos a hacer otra copia del fichero db.local, pero esta vez para configurar e DNS inverso
+
+```
+db.master.192.168.0.rev
+
+```
+> Nota: añadimos la ip del servidor sin el ultimo numero.
+
+Configuramos el fichero
+
+![](/capturas/configuracionMaterInverso.png)
+
+Configuramos origen tal como en la imagen y especificamos el nombre del servidor.
+
+
+
+Seguidamente nos vamos a 
+
+```
+/etc/bind/named.cof.options
+
+```
+
+![](/capturas/configuracionNamedConfOptions.png)
+
+Aquí añadimos que el dns escuché a través del puerto 53 y volvemos a dejar el fichero como en la imagnen.
+
+Finalmente declaramos las zonas, dentro de 
+
+```
+/etc/bind/named.cof.local
+
+```
+
+![](/capturas/configuracionNamedConfLocal.png)
+
+
+Añadimos zona para la configuración no inversa y para la inversa como se muestra en la imagen.
+
+
+## Comprobación
+
+Para comprobar que todo funciona correctamente, lo comprobamos de la siguiente manera:
+
+Para la configuracion no inversa:
+
+![](/capturas/checkzzoneNoInverso.png)
+
+Para la configuracion inversa:
+
+![](/capturas/checkzoneInverso.png.png)
+
+Comprobamos el estado de bind9
+
+![](/capturas/bind9Activo.png)
+
+Hacemos ping al servidor y clientes
+
+![](/capturas/pingServidor.png)
+
+Hacemos dig al dominio
+
+![](/capturas/digAntonio.png)
+
+
+> Nota: para hacer estas comprobaciones, es obligatorio hacerlo desde la carpeta donde están ubicados los ficheros. La carpeta sería
+
+```
+/var/cache/bind/
+
+```
+
+
+
 
