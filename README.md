@@ -137,7 +137,7 @@ Configuramos origen tal como en la imagen y especificamos el nombre del servidor
 Seguidamente nos vamos a 
 
 ```
-/etc/bind/named.cof.options
+/etc/bind/named.conf.options
 
 ```
 
@@ -148,7 +148,7 @@ Aquí añadimos que el dns escuché a través del puerto 53 y volvemos a dejar e
 Finalmente declaramos las zonas, dentro de 
 
 ```
-/etc/bind/named.cof.local
+/etc/bind/named.conf.local
 
 ```
 
@@ -190,6 +190,46 @@ Hacemos dig al dominio
 
 ```
 
+# Instalación de un servidor DNS secundario
+Instalar en otra máquina bind9 con el siguiente comando
 
+```
+apt install bind9
+```
 
+## Configuración del DNS secundario
+Cambiamos la IP y la configuración DNS de la siguiente manera:
+![](/capturas/dnsSecundarioConfZonas.png)
 
+Cambiamos el tipo de `master` a `slave`, y añadimos la cláusula "masters" y entre llaves, ponemos cuál es la IP del servidor DNS primario.
+
+## Modificaciones en la configuración del servidor DNS primario
+Hay que decirle al servidor DNS primario que permita las conexiones al secundario.
+Modificamos el fichero `named.conf.local` y añadimos `allow-transfer` y `also-notify`:
+
+![](/capturas/permitirDnsSecundario.png)
+
+## Incluir el servidor DNS secundario en las configuraciones directa e inversa del primario
+Directa:
+![](/capturas/confDirectaDnsPrimarioSecundario.png)
+Inversa:
+![](/capturas/confInversaDnsPrimarioSecundario.png)
+
+## Comprobaciones desde el servidor DNS secundario
+Ejecutar el siguiente comando:
+```
+dig servidor.antonio.org
+```
+![](/capturas/comprobacionDigSecundario.png)
+
+Ejecutar el siguiente comando:
+```
+dig @192.168.0.220 servidor.antonio.org
+```
+![](/capturas/comprobacionSecundarioInversa.png)
+
+Se pueden hacer más comprobaciones con el comando `nslookup`:
+![](/capturas/secundarioNSlookup.png)
+
+Es conveniente añadir la IP del servidor DNS secundario al fichero resolv:
+![](/capturas/secundarioResolv.png)
