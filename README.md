@@ -233,3 +233,42 @@ Se pueden hacer más comprobaciones con el comando `nslookup`:
 
 Es conveniente añadir la IP del servidor DNS secundario al fichero resolv:
 ![](/capturas/secundarioResolv.png)
+
+
+
+## Configuracion DNS-DHCP
+El servidor DHCP se va a instalar en la misma máquina que el dns primario.
+
+Modificamos el archivo de configuracion
+```
+/etc/dhcp/dhcpd.conf
+``` 
+
+![](/capturas/configracionDNS-DHCP1.png)
+
+Añadimos el nombre de dominio de nuestro servidor en nuestra máquina servidor.
+Incluimos las ips del dns primario y del dns secundario.
+También añadimos la ip del dns primario como option-routers.
+
+Añadimos una subnet DHCP a nuestra máquina servidor
+
+![](/capturas/configuracionDNS-DHCP2.png)
+
+
+En la máquina dns primaria y secundaria añadimos al archivo de configuración los dns primario y secundario.
+```
+/etc/resolv.conf
+```
+![](/capturas/configuracionDNS-DHCP5.png)
+
+
+
+## Comprobación
+
+Abrimos una máquina cliente y vemos la configuración de red.
+
+
+![](/capturas/configuracionDNS-DHCP3.png)
+![](/capturas/configuracionDNS-DHCP4.png)
+
+Vemos, que DHCP ha funcionado y recibe el nombre de dominio del servidor dns.
