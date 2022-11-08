@@ -22,7 +22,6 @@ systemctl status bind9
 ```
 /etc/resolv.conf
 ```
-Por ejemplo, se pueden cambiar a los de google:
 ![](/capturas/dnsGoogle.png)
 
 
@@ -105,7 +104,6 @@ db.local
 Con la copia de este fichero creamos otro para la configuracion no inversa de DNS. Le ponemos el nombre de 
 ```
 db.master.antonio.org
-
 ```
 
 > Nota: le ponemos el nombre de dominio al fichero.
@@ -122,7 +120,6 @@ Volvemos a hacer otra copia del fichero db.local, pero esta vez para configurar 
 
 ```
 db.master.192.168.0.rev
-
 ```
 > Nota: añadimos la ip del servidor sin el ultimo numero.
 
@@ -138,7 +135,6 @@ Seguidamente nos vamos a
 
 ```
 /etc/bind/named.conf.options
-
 ```
 
 ![](/capturas/configuracionNamedConfOptions.png)
@@ -149,7 +145,6 @@ Finalmente declaramos las zonas, dentro de
 
 ```
 /etc/bind/named.conf.local
-
 ```
 
 ![](/capturas/configuracionNamedConfLocal.png)
