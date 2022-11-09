@@ -384,3 +384,89 @@ Asignamos la IP fija 192.168.0.198 al servidor DNS a través de `fixed-address`.
 ## Comprobaciones desde el cliente (Windows XP)
 Al iniciar la máquina en la misma red, ésta debe encontrar los servidores DNS y DHCP configurados, así como obtener una IP por DHCP del rango definido.
 ![](/capturas/dns-dhcp-cliente.png)
+
+
+# Configurar DHCP y DNS con DNSMASQ
+
+Asignamos una IP fija, modificando el fichero de interfaces:
+```
+nano /etc/network/interfaces
+```
+Por ejemplo:
+```
+source /etc/network/interfaces.d/*
+
+auto lo
+iface lo inet loopback
+
+auto enp0s3
+iface enp0s3 inet static
+address 192.168.0.123
+netmask 255.255.255.0
+gateway 192.168.0.1
+```
+
+Instalamos las herramientas necesarias:
+```
+apt install dnsmasq dnsmasq-base dnsmasq-utils
+```
+
+Comprobamos si se está ejecutando con:
+```
+systemctl status dnsmasq.service
+```
+![](/capturas/dnsmasq-estado-servicio.png)
+
+Por seguridad, hacemos una copia de seguridad del fichero de configuración de DNSMASQ:
+```
+cp /etc/dnsmasq.conf /etc/dnsmasq.conf.ORIGINAL
+```
+
+Procedemos a cambiar el fichero `/etc/dnsmasq.conf`:
+
+* Cambiamos el puerto a 53 en `port`
+* Descomentamos `domain-needed`
+* Descomentamos `borgus-priv`
+* Configuramos las interfaces de red en `interface`
+* Configuramos las IPs en `listen-address`
+* Descomentamos `bind-interfaces`
+* Descomentamos `expand-hosts`
+* Configuramos el dominio en `domain`
+* Configuramos el rango de IPs en `dhcp-range`. Se define el rango de IPs, junto con la máscara de red y el tiempo de liberación por defecto.
+* Configuramos el tiempo de liberación máxima con `dhcp-lease-max`
+* Descomentamos `dhcp-leasefile`
+* Descomentamos `dhcp-authoritative`
+* Descomentamos `log-dhcp` para que se escriban logs en el sistema.
+* Descomentamos `conf-dir`
+
+El fichero quedaría así:
+```
+port=53
+domain-needed
+bogus-priv
+interface=lo,enp0s3
+listen-address=127.0.0.1,192.168.0.123
+bind-interfaces
+expand-hosts
+domain=antonio.org
+dhcp-range=192.168.0.210,192.168.0.240,255.255.255.0,2h
+dhcp-lease-max=86400
+dhcp-leasefile=/var/lib/misc/dnsmasq.leases
+dhcp-authoritative
+log-dhcp
+conf-dir=/etc/dnsmasq.d
+```
+
+Ahora, reiniciamos el servicio para que los cambios se apliquen.
+```
+systemctl restart dnsmasq.service
+```
+
+Viendo el estado, se comprueba algunos de los cambios, como el puerto 53 y el rango de IPs definido.
+![](/capturas/dnsmasq-despues-de-configurar.png)
+
+Por último, comprobamos con un Windows XP como máquina cliente y vemos que le asigna una IP del rango y contiene los parámetros del servidor que acabamos de configurar:
+![](/capturas/dnsmasq-cliente.png)
+
+Comprobando los logs del sistema, también se verifica que el servidor está funcionando correctamente:
+![](/capturas/dnsmasq-logs.png)
