@@ -1,3 +1,39 @@
+- [Tarea 2. Fecha: 09/11/2022](#tarea-2-fecha--09-11-2022)
+- [Información sobre MV y versión de SO](#informaci-n-sobre-mv-y-versi-n-de-so)
+  * [VirtualBox](#virtualbox)
+  * [Debian](#debian)
+  * [Windows XP](#windows-xp)
+- [Instalación de un servidor DNS](#instalaci-n-de-un-servidor-dns)
+  * [Comprobación del estado del servicio](#comprobaci-n-del-estado-del-servicio)
+  * [Comprobación de que el servicio dns funciona en nuestro servidor (localhost)](#comprobaci-n-de-que-el-servicio-dns-funciona-en-nuestro-servidor--localhost-)
+- [Configuración del servidor DNS](#configuraci-n-del-servidor-dns)
+  * [Diferentes archivos de configuración](#diferentes-archivos-de-configuraci-n)
+  * [Ficheros de configuración en otras rutas](#ficheros-de-configuraci-n-en-otras-rutas)
+  * [Fichero de configuración de zona](#fichero-de-configuraci-n-de-zona)
+  * [Fichero de ruta de directorio de Bind](#fichero-de-ruta-de-directorio-de-bind)
+  * [Configuración de servidor maestro](#configuraci-n-de-servidor-maestro)
+  * [Comprobación](#comprobaci-n)
+- [Instalación de un servidor DNS secundario](#instalaci-n-de-un-servidor-dns-secundario)
+  * [Configuración del DNS secundario](#configuraci-n-del-dns-secundario)
+  * [Modificaciones en la configuración del servidor DNS primario](#modificaciones-en-la-configuraci-n-del-servidor-dns-primario)
+  * [Incluir el servidor DNS secundario en las configuraciones directa e inversa del primario](#incluir-el-servidor-dns-secundario-en-las-configuraciones-directa-e-inversa-del-primario)
+  * [Comprobaciones desde el servidor DNS secundario](#comprobaciones-desde-el-servidor-dns-secundario)
+- [Configuracion DNS-DHCP](#configuracion-dns-dhcp)
+  * [Configuración DNS](#configuraci-n-dns)
+  * [Configuración DHCP](#configuraci-n-dhcp)
+  * [Comprobaciones desde el cliente (Windows XP)](#comprobaciones-desde-el-cliente--windows-xp-)
+
+
+# Tarea 2. Fecha: 09/11/2022
+
+# Información sobre MV y versión de SO
+## VirtualBox
+![](/capturas/info-virtualbox.png)
+## Debian
+![](/capturas/info-debian.png)
+## Windows XP
+![](/capturas/info-xp.png)
+
 # Instalación de un servidor DNS
 Instalar bind9 con el siguiente comando
 
@@ -231,39 +267,120 @@ Es conveniente añadir la IP del servidor DNS secundario al fichero resolv:
 
 
 
-## Configuracion DNS-DHCP
-El servidor DHCP se va a instalar en la misma máquina que el dns primario.
+# Configuracion DNS-DHCP
+Para esta práctica se crean 3 máquinas virtuales nuevas. Dos debian, que van a ser el servidor DHCP y el DNS, respectivamente, y un Windows XP que hará de cliente.
 
-Modificamos el archivo de configuracion
+## Configuración DNS
+Se procede a instalar `bind9` como se explica previamente en esta guía. 
+Principalmente se modifican los siguientes ficheros de configuración:
+
+* /etc/bind/named.conf.options
 ```
-/etc/dhcp/dhcpd.conf
-``` 
-
-![](/capturas/configracionDNS-DHCP1.png)
-
-Añadimos el nombre de dominio de nuestro servidor en nuestra máquina servidor.
-Incluimos las ips del dns primario y del dns secundario.
-También añadimos la ip del dns primario como option-routers.
-
-Añadimos una subnet DHCP a nuestra máquina servidor
-
-![](/capturas/configuracionDNS-DHCP2.png)
-
-
-En la máquina dns primaria y secundaria añadimos al archivo de configuración los dns primario y secundario.
+options {
+    directory "/var/cache/bind";
+    listen-on port 53 { any; };
+    recursion yes;
+    allow-recursion { localnets; };
+};
 ```
-/etc/resolv.conf
+![](/capturas/dns-dhcp-conf-options.png)
+
+* /etc/bind/named.conf.local
 ```
-![](/capturas/configuracionDNS-DHCP5.png)
+zone "antonio.org" in {
+    type master;
+    file "db.master.antonio.org";
+};
+
+zone "0.168.192.IN-ADDR.ARPA" in {
+    type master;
+    file "db.master.192.168.0.rev";
+};
+```
+![](/capturas/dns-dhcp-named-local.png)
+
+* /var/cache/bind/db.master.antonio.org
+```                                                                                           
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+$ORIGIN antonio.org.
+@       IN      SOA     dns.antonio.org. root.antonio.org. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      dns.antonio.org.
+dns     IN      A       192.168.0.198
+```
+![](/capturas/dns-dhcp-antonio.png)
+
+* /var/cache/bind/db.master.192.168.0.rev
+```
+;
+; BIND data file for local loopback interface
+;
+$TTL    604800
+$ORIGIN 0.168.192.IN-ADDR.ARPA.
+@       IN      SOA     dns.antonio.org. root.antonio.org. (
+                              2         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+;
+@       IN      NS      dns.antonio.org.
+198     IN      PTR     dns.antonio.org.
+```
+![](/capturas/dns-dhcp-antonio-rev.png)
 
 
+## Configuración DHCP
+Se procede a instalar `isc-dhcp-server` como se explica en [esta guía](https://github.com/naranjocarmona/sred-dhcp). 
+Principalmente se modifica el siguiente fichero de configuración:
 
-## Comprobación
+* /etc/dhcp/dhcpd.conf
+```
+option domain-name "dhcp.local";
+option domain-name-servers 8.8.8.8;
+option routers 192.168.0.1;
+default-lease-time 86400;
+max-lease-time 691200;
+min-lease-time 7200;
 
-Abrimos una máquina cliente y vemos la configuración de red.
+authoritative;
 
+allow-unknow-clients;
+ddns-updates on;
+ddns-update-style interim;
+ddns-domainname "antonio.org";
+ddns-rev-domainname "in-addr.arpa.";
 
-![](/capturas/configuracionDNS-DHCP3.png)
-![](/capturas/configuracionDNS-DHCP4.png)
+subnet 192.168.0.0 netmask 255.255.255.0 {
+    range 192.168.0.200 192.168.0.240;
+    option domain-name "dns.antonio.org";
+    option domain-name-servers 192.168.0.198;
+    option routers 192.168.0.120;
+    option broadcast-address 192.168.0.255;
+    default-lease-time 600;
+    max-lease-time 7200;
+}
 
-Vemos, que DHCP ha funcionado y recibe el nombre de dominio del servidor dns.
+host dns.antonio.org {
+  hardware ethernet 08:00:27:d8:0b:98;
+  fixed-address 192.168.0.198;
+}
+```
+
+Con las opciones `ddns-updates` y `ddns-update-style interim` activamos la actualización automática al DNS.
+
+Definimos DHCP para que dé IPs en el rango de 192.168.0.200 a 192.168.0.240.
+
+Asignamos la IP fija 192.168.0.198 al servidor DNS a través de `fixed-address`.
+
+## Comprobaciones desde el cliente (Windows XP)
+Al iniciar la máquina en la misma red, ésta debe encontrar los servidores DNS y DHCP configurados, así como obtener una IP por DHCP del rango definido.
+![](/capturas/dns-dhcp-cliente.png)
