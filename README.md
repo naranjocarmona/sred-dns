@@ -1,29 +1,3 @@
-- [Tarea 2. Fecha: 09/11/2022](#tarea-2-fecha--09-11-2022)
-- [Información sobre MV y versión de SO](#informaci-n-sobre-mv-y-versi-n-de-so)
-  * [VirtualBox](#virtualbox)
-  * [Debian](#debian)
-  * [Windows XP](#windows-xp)
-- [Instalación de un servidor DNS](#instalaci-n-de-un-servidor-dns)
-  * [Comprobación del estado del servicio](#comprobaci-n-del-estado-del-servicio)
-  * [Comprobación de que el servicio dns funciona en nuestro servidor (localhost)](#comprobaci-n-de-que-el-servicio-dns-funciona-en-nuestro-servidor--localhost-)
-- [Configuración del servidor DNS](#configuraci-n-del-servidor-dns)
-  * [Diferentes archivos de configuración](#diferentes-archivos-de-configuraci-n)
-  * [Ficheros de configuración en otras rutas](#ficheros-de-configuraci-n-en-otras-rutas)
-  * [Fichero de configuración de zona](#fichero-de-configuraci-n-de-zona)
-  * [Fichero de ruta de directorio de Bind](#fichero-de-ruta-de-directorio-de-bind)
-  * [Configuración de servidor maestro](#configuraci-n-de-servidor-maestro)
-  * [Comprobación](#comprobaci-n)
-- [Instalación de un servidor DNS secundario](#instalaci-n-de-un-servidor-dns-secundario)
-  * [Configuración del DNS secundario](#configuraci-n-del-dns-secundario)
-  * [Modificaciones en la configuración del servidor DNS primario](#modificaciones-en-la-configuraci-n-del-servidor-dns-primario)
-  * [Incluir el servidor DNS secundario en las configuraciones directa e inversa del primario](#incluir-el-servidor-dns-secundario-en-las-configuraciones-directa-e-inversa-del-primario)
-  * [Comprobaciones desde el servidor DNS secundario](#comprobaciones-desde-el-servidor-dns-secundario)
-- [Configuracion DNS-DHCP](#configuracion-dns-dhcp)
-  * [Configuración DNS](#configuraci-n-dns)
-  * [Configuración DHCP](#configuraci-n-dhcp)
-  * [Comprobaciones desde el cliente (Windows XP)](#comprobaciones-desde-el-cliente--windows-xp-)
-
-
 # Tarea 2. Fecha: 09/11/2022
 
 # Información sobre MV y versión de SO
